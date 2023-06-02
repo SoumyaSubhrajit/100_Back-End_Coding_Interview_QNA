@@ -11,9 +11,9 @@
 
   <body>
 
-    <div class="login-box">
-      <h2>Login</h2>
-      <form action="">
+    <form action="/register" method="post">
+      <div class="login-box">
+        <h2>Login</h2>
         <div class="user-box">
           <input type="text" name="" required>
           <label>Username</label>
@@ -25,7 +25,7 @@
         </div>
 
         <div class="button-form">
-          <a id="submit" href="#">Submit</a>
+          <button id="submit" type="submit">Submit</button>
         </div>
 
         <div id="register">
@@ -33,9 +33,53 @@
           <a id="reg" href="#">Register</a>
         </div>
 
-      </form>
+    </form>
     </div>
   </body>
   <!--  -->
+
+  <script>
+    // Handle form submission
+    document.addEventListener('DOMContentLoaded', function () {
+      var form = document.getElementById('login-form');
+      form.addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Retrieve form data
+        var formData = new FormData(this);
+        var username = formData.get('username');
+        var password = formData.get('password');
+
+        // Perform basic validation
+        if (!username || !password) {
+          console.error('Please fill in all fields.');
+          return;
+        }
+
+        // Create a JSON payload for the request body
+        var payload = { username: username, password: password };
+
+        // Send a POST request to the server
+        fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+            // Handle the response from the server
+            console.log(data); // Replace with your desired logic
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+      });
+    });
+
+  </script>
 
 </html>

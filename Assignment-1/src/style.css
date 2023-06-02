@@ -84,6 +84,7 @@ body {
 ADDING THE STYLE TO THE BUTTON */
 
 #submit {
+  background-color: transparent;
   padding: 10px 20px;
   color: #cbbddb;
   text-decoration: none;
