@@ -47,11 +47,10 @@ app.post('/register', (req, res) => {
     const sql = `INSERT INTO users (username, password,email) VALUES (?,?,?)`
     connction.query(sql, [username, hashPassword, email], (err, result) => {
       if (err) {
-        console.error(`Error occure hato create user :-(`, err);
+        console.error(`Error occure in creating the user :-(`, err);
         res.status(500).json({
           messgae: "Internal server error :-("
         })
-        return;
 
       }
       res.status(201).json({
