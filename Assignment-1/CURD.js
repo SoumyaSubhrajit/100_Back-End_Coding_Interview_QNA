@@ -1,71 +1,128 @@
 const express = require('express');
-const mysql = require('mysql');
-require('dotenv').config();
+const mysql = require("mysql");
+const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const bodyPareser = require('body-parser');
+const { status } = require('express/lib/response');
+require('dotenv').config();
 
 
 const app = express();
-app.use(bodyPareser.json());
+app.use(bodyParser.json());
 
-const connction = mysql.createConnection({
+// CREATING CONNECTION TO MYSQL;
+const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: process.env.PASSWORD,
   database: 'users'
 })
 
-connction.connect(err => {
+
+connection.connect((err) => {
   if (err) {
-    new Error(`DB conncetion has failed :-(`)
+    new Error(`The DB is not connected :-(`)
   }
-  console.log(`DB connection has made sucessfully :-)`);
+  console.log(`DB is connected :-)`);
 })
 
-const handleRequest = (req, res) => {
-  connction.end((err => {
-    if (err) {
-      res.send(`Something worng in conncetion :-(`)
-    }
-    res.send(`Enjoy yourself :-)`);
-  }))
-}
+// User Registration 
 
-// User registration: 
+// C - CREATE USER..
 app.post('/register', (req, res) => {
   const { username, password, email } = req.body;
 
-  // Hash the password..
-  bcrypt.hash(password, 10, (err, hashPassword) => {
+  // hasing the password..
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
     if (err) {
-      console.error(`Error occure hasing the password!`, err);
+      console.error(`Something went wrong.`);
+
       res.status(500).json({
-        messgae: "Internal server error :-("
+        message: 'Something went wrong  in hashing the password '
       })
       return;
     }
-    const sql = `INSERT INTO users (username, password,email) VALUES (?,?,?)`
-    connction.query(sql, [username, hashPassword, email], (err, result) => {
-      if (err) {
-        console.error(`Error occure in creating the user :-(`, err);
-        res.status(500).json({
-          messgae: "Internal server error :-("
-        })
 
+    const sql = `INSERT into users (username,password,email) VALUES(?,?,?)`
+
+    connection.query(sql, [username, hashedPassword, email], (err, result) => {
+      if (err) {
+        console.error(`Something went wrong :-( in DB`, err);
+        res.status(500).json({
+          message: 'Somehting went wrong in DB'
+        })
+        return;
       }
       res.status(201).json({
-        messgae: `User create sucessfully :-)`
+        message: 'Creating user is successful :-)'
       })
     })
   })
 })
 
+// R- Read exicution.
+app.get('/data', (req, res) => {
+  const sqlQuery = `select * from users`;
+
+  connection.query(sqlQuery, (err, rows) => {
+    if (err) {
+      console.error(`Error getting connection..`, err);
+      res.send(500).json({
+        status: 'Failed',
+        message: 'Internal Server Error'
+      })
+      return;
+    }
+    console.log(`Data retriving sucessful`, rows);
+    res.status(201).json({
+      status: `Sucessful`,
+      message: `Data retriving sucessful`,
+      data: rows
+    })
+  })
+})
+
+
+// U - Update.
+app.put('/data/:id', (req, res) => {
+  const id = req.params.id;
+  const { username, password, email } = req.body;
+
+  // Hash the new password
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error(`Something went wrong.`);
+      res.status(500).json({
+        message: 'Something went wrong in hashing the password'
+      });
+      return;
+    }
+
+    const sql = `UPDATE users SET username=?, password=?, email=? WHERE id=?`;
+    const values = [username, hashedPassword, email, id];
+
+    connection.query(sql, values, (err, result) => {
+      if (err) {
+        console.error(`Something went wrong :-( in DB`, err);
+        res.status(500).json({
+          message: 'Something went wrong in DB'
+        });
+        return;
+      }
+      res.status(200).json({
+        message: 'Data updated successfully'
+      });
+    });
+  });
+});
+
+
+
 app.get('/', (req, res) => {
-  res.send("<h2>This the home page</h2>")
+  res.send('<h1> This server is on! </h1>');
 })
 
-PORT = 8000;
+const PORT = 8000;
+
 app.listen(PORT, () => {
-  console.log("Am Listing Master Kanha :-)");
+  console.log(`Server is listing :-)`);
 })
-
