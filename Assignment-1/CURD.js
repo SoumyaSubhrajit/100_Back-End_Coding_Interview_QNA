@@ -122,7 +122,7 @@ app.get('/', (req, res) => {
 })
 
 const PORT = 8000;
-
+// This is the server.
 app.listen(PORT, () => {
   console.log(`Server is listing :-)`);
 })
